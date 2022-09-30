@@ -1,0 +1,37 @@
+---
+title: "Untitled"
+output: html_document
+date: '2022-09-29'
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r setup, include=FALSE}
+df <- data.frame(Year = c(2010:2020), 
+                 China = c(67.61, 66.478, 65.034, 64.728, 66.939, 66.534, 69.462, 77.902, 92.713, 123.914, 138.677),
+                 US = c(24.224, 25.707, 26.553, 27.638, 28.855, 30.587, 33.059, 36.499, 43.235, 52.89, 59.27))
+
+pred <- data.frame(Year=2010:2030)
+pred$China <- predict(lm(China ~ poly(Year, 2), data=df),newdata=pred, interval = "confidence", level = 0.9)
+pred$US <- predict(lm(US ~ poly(Year, 2), data=df),newdata=pred, interval = "confidence", level = 0.9)
+
+plot <- df %>% ggplot() +
+  geom_point(aes(x = Year, y = US), color = "Blue") +
+  geom_point(aes(x = Year, y = China), color = "Red") +
+  labs(x = "Year",
+       y = "Thousands of Papers Published",
+       title = "Number AI Papers in the US vs China")
+
+plot <- plot + 
+  geom_line(aes(x = Year, y = China[,"fit"]), data=pred) +
+  geom_ribbon(aes(x = Year, ymin = China[,"lwr"], ymax = China[,"upr"]), fill = "red", alpha = 0.4, data=pred) +
+  geom_line(aes(x = Year, y = US[,"fit"]), data=pred) +
+  geom_ribbon(aes(x = Year, ymin = US[,"lwr"], ymax = US[,"upr"]), fill = "blue", alpha = 0.4, data=pred)
+```
+
+```{r}
+plot
+```
+
